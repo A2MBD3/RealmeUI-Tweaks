@@ -1,8 +1,8 @@
 id=A2MBD3_coloros_tweaks
 name=Realme UI Tweaks
-version=v1.0
-versionCode=1
+version=v1.1
+versionCode=101
 author=@A2MBD3
-description=Advanced tweaks for Realme/ColorOS devices - Modular system
+description=Advanced tweaks for Realme devices running realme UI
 updateJson=https://raw.githubusercontent.com/A2MBD3/RealmeUI-Tweaks/main/update.json
 webroot=true
