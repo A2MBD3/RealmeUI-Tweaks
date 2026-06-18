@@ -27,7 +27,7 @@
 
 ## 🌐 WebUI Access
 
-- **Magisk**: Run `python -m http.server 8080` in webroot directory
+- **Magisk**: Download KSU Webui 
 - **KernelSU**: Open from Modules tab
 - **Kitsune Mask**: Open from Modules tab
 
