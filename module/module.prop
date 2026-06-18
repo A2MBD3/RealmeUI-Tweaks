@@ -4,4 +4,5 @@ version=v1.0
 versionCode=1
 author=@A2MBD3
 description=Advanced tweaks for Realme/ColorOS devices - Modular system
+updateJson=https://raw.githubusercontent.com/A2MBD3/RealmeUI-Tweaks/main/update.json
 webroot=true
