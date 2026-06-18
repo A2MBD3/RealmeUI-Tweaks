@@ -1,0 +1,99 @@
+#!/sbin/sh
+
+#################
+# Initialization
+#################
+
+umask 022
+
+# echo before loading util_functions
+ui_print() { echo "$1"; }
+
+require_new_ksud() {
+ui_print "*******************************"
+ui_print "! KernelSU version too old!"
+ui_print "! Please update KernelSU to latest version"
+ui_print "*******************************"
+exit 1
+}
+
+#########################
+# Load util_functions.sh
+#########################
+
+OUTFD=$2
+ZIPFILE=$3
+
+mount /data 2>/dev/null
+
+[ -f /data/adb/magisk/util_functions.sh ] || require_new_ksud
+. /data/adb/magisk/util_functions.sh
+[ $MAGISK_VER_CODE -gt 23000 ] || require_new_ksud
+
+api_level_arch_detect
+
+# Setup busybox and binaries
+$BOOTMODE && boot_actions || recovery_actions
+
+#################
+# Preparation
+#################
+
+# Extract common files
+setup_flashable
+
+# Mod paths
+MODPATH=$NVBASE/modules/$MODID
+
+# Remove placeholder
+rm -f $MODPATH/system/placeholder 2>/dev/null
+
+###################
+# Module info
+###################
+
+print_modname
+
+##############
+# Install
+##############
+
+# Create mod paths
+rm -rf $MODPATH 2>/dev/null
+mkdir -p $MODPATH
+
+# Copy module files
+ui_print "- Copying module files"
+cp -af $TMPDIR/system $MODPATH/
+cp -af $TMPDIR/webroot $MODPATH/
+cp -af $TMPDIR/customize.sh $MODPATH/
+cp -af $TMPDIR/service.sh $MODPATH/
+cp -af $TMPDIR/uninstall.sh $MODPATH/
+
+# Set permissions
+ui_print "- Setting permissions"
+set_perm_recursive $MODPATH/system/bin 0 0 0755 0755
+set_perm $MODPATH/system/bin/realme-tweaks 0 0 0755
+
+for module in $MODPATH/system/bin/modules/*.sh; do
+set_perm $module 0 0 0755
+done
+
+# Remove placeholder
+rm -f $MODPATH/system/placeholder 2>/dev/null
+
+###################
+# Complete
+###################
+
+# Remove stuff that doesn't belong to this module
+rm -rf $TMPDIR 2>/dev/null
+
+ui_print "- Done"
+ui_print ""
+
+ui_print "📱 Realme UI Tweaks installed!"
+ui_print "🔄 Please reboot your device"
+ui_print "🌐 WebUI: Open from your root manager"
+
+exit 0

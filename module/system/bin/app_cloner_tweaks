@@ -1,0 +1,115 @@
+#!/system/bin/sh
+
+#=============================================
+# App Cloner Tweaks v3.0.0
+# Developer: Abdullah Al Mamun 🇧🇩 (@A2MBD3)
+# For: Realme UI 1.0 | Android 10
+#=============================================
+
+XML_FILE="/data/oppo/coloros/multiapp/oppo_allowed_app.xml"
+TEMP_FILE="/data/local/tmp/app_cloner_temp.xml"
+STATE_FILE="/data/local/tmp/app_cloner_state"
+PRESET_APPS="mark.via.gp"
+
+echo ""
+echo "   📱 App Cloner Tweaks v3.0.0"
+echo "   🔧 Whitelist Updater"
+echo ""
+
+# Scan Apps
+echo "── Scanning apps..."
+
+CURRENT_APPS=$(pm list packages -3 2>/dev/null | cut -d: -f2 | sort)
+APP_COUNT=$(echo "$CURRENT_APPS" | grep -c .)
+
+if [ "$APP_COUNT" -eq 0 ]; then
+    echo "   [!] No user apps found"
+    echo ""
+    exit 0
+fi
+
+echo "   [✓] Found $APP_COUNT user apps"
+echo ""
+
+# Change Detection
+echo "── Checking changes..."
+
+CURRENT_HASH=$(echo "$CURRENT_APPS" | md5sum 2>/dev/null | cut -d' ' -f1)
+STORED_HASH=$(cat "$STATE_FILE" 2>/dev/null)
+
+if [ "$CURRENT_HASH" = "$STORED_HASH" ] && [ -f "$XML_FILE" ]; then
+    echo "   [✓] No new apps detected"
+    echo "   [✓] Already up-to-date"
+    echo ""
+    echo "── Force stopping App Cloner..."
+    am force-stop com.coloros.oppomultiapp 2>/dev/null
+    echo "   [✓] Done"
+    echo ""
+    echo "   ✅ $APP_COUNT apps whitelisted"
+    echo ""
+    exit 0
+fi
+
+if [ -z "$STORED_HASH" ]; then
+    echo "   [!] First run"
+else
+    echo "   [!] New apps detected"
+fi
+echo "   [✓] Update required"
+echo ""
+
+# Add Presets
+echo "── Adding presets..."
+
+for app in $PRESET_APPS; do
+    if ! echo "$CURRENT_APPS" | grep -q "^$app$"; then
+        CURRENT_APPS="$CURRENT_APPS"$'\n'"$app"
+        echo "   [+] $app"
+    else
+        echo "   [✓] $app"
+    fi
+done
+echo ""
+
+# Build XML
+echo "── Building whitelist..."
+
+ALL_APPS=$(echo "$CURRENT_APPS" | sort -u | grep -v '^$')
+FINAL_COUNT=$(echo "$ALL_APPS" | grep -c .)
+
+{
+    echo '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>'
+    echo '<gs>'
+    echo "$ALL_APPS" | while read app; do
+        [ -n "$app" ] && echo "    <allowedapp>${app}</allowedapp>"
+    done
+    echo '</gs>'
+} > "$TEMP_FILE"
+
+cp "$TEMP_FILE" "$XML_FILE"
+chmod 644 "$XML_FILE"
+chown system:system "$XML_FILE" 2>/dev/null
+rm -f "$TEMP_FILE"
+
+echo "   [✓] $FINAL_COUNT apps whitelisted"
+echo ""
+
+# Apply
+echo "── Applying changes..."
+
+am force-stop com.coloros.oppomultiapp 2>/dev/null
+echo "   [✓] App Cloner force stopped"
+
+echo "$CURRENT_HASH" > "$STATE_FILE"
+echo "   [✓] State saved"
+echo ""
+
+# Done
+echo "── ✅ Whitelist Updated"
+echo ""
+echo "   Total apps : $FINAL_COUNT"
+echo "   Systemless : Yes"
+echo "   Status    : Active"
+echo ""
+
+exit 0

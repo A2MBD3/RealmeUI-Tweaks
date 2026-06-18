@@ -1,0 +1,9 @@
+*.zip
+*.log
+.DS_Store
+.idea/
+*.iml
+.vscode/
+__pycache__/
+*.pyc
+RealmeUI-Tweaks/
