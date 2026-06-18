@@ -47,7 +47,6 @@ jobs:
           MODULE_LIST="- No modules found\n"
         fi
         
-        # Properly escape for GitHub Actions
         echo "modules<<EOF" >> $GITHUB_OUTPUT
         echo -e "$MODULE_LIST" >> $GITHUB_OUTPUT
         echo "EOF" >> $GITHUB_OUTPUT
@@ -55,13 +54,16 @@ jobs:
     
     - name: Get Changelog
       id: changelog
+      continue-on-error: true
       run: |
         if [ -f "CHANGELOG.md" ]; then
+          echo "✅ Changelog found"
           echo "changelog<<EOF" >> $GITHUB_OUTPUT
           cat CHANGELOG.md >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
           echo "✅ Changelog loaded"
         else
+          echo "⚠️ No CHANGELOG.md found, skipping..."
           echo "changelog=No changelog provided" >> $GITHUB_OUTPUT
         fi
     
@@ -112,7 +114,7 @@ jobs:
           4. Open WebUI from your root manager
           
           ### 📝 Changelog
-          ${{ steps.changelog.outputs.changelog }}
+          ${{ steps.changelog.outputs.changelog || 'No changelog provided' }}
           
           ### 👨‍💻 Developer
           Abdullah Al Mamun 🇧🇩 [@A2MBD3](https://t.me/A2MBD3)
