@@ -43,13 +43,14 @@ jobs:
           done
         fi
         
-        # Fallback if no modules found
         if [ -z "$MODULE_LIST" ]; then
           MODULE_LIST="- No modules found\n"
         fi
         
-        # Save to output
-        echo -e "modules=$MODULE_LIST" >> $GITHUB_OUTPUT
+        # Properly escape for GitHub Actions
+        echo "modules<<EOF" >> $GITHUB_OUTPUT
+        echo -e "$MODULE_LIST" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
         echo "✅ Module list generated"
     
     - name: Get Changelog
